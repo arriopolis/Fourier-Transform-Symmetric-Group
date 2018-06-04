@@ -1,6 +1,6 @@
 # Fourier Transform of the Symmetric Group
 
-This repository contains a very basic program that calculates a Fourier Transform of the Symmetric Group, based on Young-Yamanuchi's representations.
+This repository contains a very basic program that calculates a Fourier Transform of the Symmetric Group, based on Young-Yamanouchi's representations.
 
 One can run the program as follows:
 
