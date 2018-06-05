@@ -24,9 +24,9 @@ class FourierTransform:
         YYs = {yd : YoungYamanouchi(yd) for yd in get_list_young_diagrams(n)}
         col = 0
         fact_n = int(factorial(n))
+        self.ps = [get_standard_form_from_table(func) for func in it.permutations(range(1,n+1))]
         self.matrix = np.zeros((fact_n, fact_n))
-        for func in it.permutations(range(1,n+1)):
-            p = get_standard_form_from_table(func)
+        for p in self.ps:
             row = 0
             for yd,YY in YYs.items():
                 dim = list(YY.repr.values())[0].shape[0]
@@ -37,13 +37,19 @@ class FourierTransform:
             col += 1
 
     def __str__(self):
-        return str(self.matrix)
+        s = [
+            "The permutations of S{} correspond to the Cartesian basis vectors as follows:".format(n),
+            '\n'.join(map(lambda t: "e{} : {}".format(t[0]+1,t[1]),enumerate(self.ps))),
+            "Then the Fourier Transform is given by:",
+            str(self.matrix),
+            "Maximal entry-wise difference from unitarity: {}".format(np.max(np.max(np.abs(U.matrix @ U.matrix.conj().T - np.eye(U.matrix.shape[0])))))
+        ]
+        return '\n'.join(s)
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) == 1: n = 3
     else: n = int(sys.argv[1])
-    print("Fourier transform of S{}:".format(n))
+    print("Calculating the Fourier transform of S{}...".format(n))
     U = FourierTransform(n)
     print(U)
-    print("Maximal entry-wise difference from unitarity:", np.max(np.max(np.abs(U.matrix @ U.matrix.conj().T - np.eye(U.matrix.shape[0])))))

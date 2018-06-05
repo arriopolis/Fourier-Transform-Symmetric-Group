@@ -1,4 +1,5 @@
 import numpy as np
+np.set_printoptions(linewidth=200)
 import itertools as it
 from Permutation import Permutation,get_standard_form_from_table
 from Young_tableaux import YoungDiagram,YoungTableau
@@ -22,11 +23,11 @@ class YoungYamanouchi:
     def __init__(self, yd):
         assert isinstance(yd, YoungDiagram)
         self.yd = yd
-        yts = get_list_young_tableaux(yd)
+        self.yts = get_list_young_tableaux(yd)
         tms = []
         for i in range(1,yd.n):
-            tm = np.zeros((len(yts), len(yts)))
-            for col,yt in enumerate(yts):
+            tm = np.zeros((len(self.yts), len(self.yts)))
+            for col,yt in enumerate(self.yts):
                 yi = [i in r for r in yt.nums].index(True)
                 xi = yt.nums[yi].index(i)
                 yj = [i+1 in r for r in yt.nums].index(True)
@@ -39,24 +40,32 @@ class YoungYamanouchi:
                     new_yt = yt.copy()
                     new_yt.nums[yi][xi] = i+1
                     new_yt.nums[yj][xj] = i
-                    row = yts.index(new_yt)
+                    row = self.yts.index(new_yt)
                     tm[row,col] = np.sqrt(1 - 1 / np.square(axial_dist))
             tms.append(tm)
         self.repr = {}
         for func in it.permutations(range(1,yd.n+1)):
             p = get_standard_form_from_table(func)
             tp = p.get_neighboring_transposition_product()
-            m = np.eye(len(yts))
+            m = np.eye(len(self.yts))
             for i,_ in tp.cycles:
                 m = m @ tms[i-1]
             self.repr[p] = m
 
     def __str__(self):
-        s = ["Diagram:\n{}\n".format(str(self.yd))]
+        s = ["The Young-Yamanouchi representation corersponding to the following Young diagram:\n    {}".format(str(self.yd).replace('\n','\n    '))]
+        s.append("The tableaux correspond to the Cartesian basis vectors as follows:")
+        for i,yt in enumerate(self.yts):
+            s.append("Cartesian basis vector e{}:".format(i+1))
+            s.append('    {}'.format(str(yt).replace('\n','\n    ')))
+        s.append("The permutations from S{} map as follows:".format(self.yd.n))
         for p,m in self.repr.items():
-            s.append("{}\n{}\n".format(p,m))
+            s.append("Permutation {}:\n    {}".format(p,str(m).replace('\n','\n    ')))
         return '\n'.join(s)
 
 if __name__ == "__main__":
-    yd = YoungDiagram([2,1])
+    import sys
+    if len(sys.argv) == 1: l = [2,1]
+    else: l = list(map(int,sys.argv[1:]))
+    yd = YoungDiagram(l)
     print(YoungYamanouchi(yd))
